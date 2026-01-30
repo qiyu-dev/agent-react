@@ -21,5 +21,5 @@ COPY . .
 # 暴露端口
 EXPOSE 8000
 
-# 启动命令 - 使用 shell 格式以正确解析 PORT 环境变量
-CMD gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 wsgi:app
+# 启动命令 - 通过 sh -c 确保环境变量被正确解析
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 wsgi:app"]
