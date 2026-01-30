@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 COPY . .
 
 # 暴露端口
-EXPOSE 5000
+EXPOSE 8000
 
-# 启动命令
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "web:app"]
+# 启动命令 - 使用 shell 格式以正确解析 PORT 环境变量
+CMD gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 wsgi:app

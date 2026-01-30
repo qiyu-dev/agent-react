@@ -34,5 +34,6 @@ def api_query():
 
 
 if __name__ == '__main__':
-    # 使用固定端口 8000，不依赖环境变量
-    app.run(host='0.0.0.0', port=8000, debug=False)
+    # 支持 Railway 的 PORT 环境变量，默认为 8000
+    port = int(os.environ.get('PORT', 8000))
+    app.run(host='0.0.0.0', port=port, debug=False)
