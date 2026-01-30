@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>智能 Agent 助手</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      height: 90vh;
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px;
+      text-align: center;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .header h1 { font-size: 28px; margin-bottom: 4px; }
+    .header p { font-size: 14px; opacity: 0.9; }
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .message {
+      display: flex;
+      gap: 12px;
+      animation: slideIn 0.3s ease-out;
+    }
+    .message.user { justify-content: flex-end; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .message-bubble {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      line-height: 1.6;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
+    .message.user .message-bubble {
+      background: #667eea;
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+    .message.assistant .message-bubble {
+      background: #f0f0f0;
+      color: #333;
+      border-bottom-left-radius: 2px;
+    }
+    .loading-bubble {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      background: #f0f0f0;
+      color: #333;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border-bottom-left-radius: 2px;
+    }
+    .loading-dot {
+      width: 8px;
+      height: 8px;
+      background: #667eea;
+      border-radius: 50%;
+      animation: blink 1.4s infinite;
+    }
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+    .input-area {
+      border-top: 1px solid #e0e0e0;
+      padding: 16px;
+      background: #fafafa;
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    textarea {
+      flex: 1;
+      resize: none;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: inherit;
+      font-size: 14px;
+      max-height: 120px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    textarea:focus { border-color: #667eea; }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    button:hover:not(:disabled) { background: #5568d3; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .error-message { color: #e74c3c; font-size: 13px; padding: 8px; background: #fadbd8; border-radius: 6px; }
+    @media (max-width: 600px) {
+      .container { height: 100vh; border-radius: 0; }
+      .message-bubble { max-width: 85%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🤖 智能 Agent 助手</h1>
+      <p>基于 ReAct 框架的问答系统，支持实时网络搜索</p>
+    </div>
+    <div class="chat-area" id="chatArea"></div>
+    <div class="input-area">
+      <textarea id="question" rows="1" placeholder="输入你的问题... (Ctrl+Enter 发送)" autofocus></textarea>
+      <button id="send" style="height: 40px;">发送</button>
+    </div>
+  </div>
+
+  <script>
+    const chatArea = document.getElementById('chatArea');
+    const input = document.getElementById('question');
+    const sendBtn = document.getElementById('send');
+
+    function addMessage(text, isUser) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.textContent = text;
+      msgDiv.appendChild(bubble);
+      chatArea.appendChild(msgDiv);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function addLoadingBubble() {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message assistant';
+      msgDiv.id = 'loading-message';
+      const bubble = document.createElement('div');
+      bubble.className = 'loading-bubble';
+      for (let i = 0; i < 3; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'loading-dot';
+        bubble.appendChild(dot);
+      }
+      msgDiv.appendChild(bubble);
+      chatArea.appendChild(msgDiv);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function removeLoadingBubble() {
+      const loading = document.getElementById('loading-message');
+      if (loading) loading.remove();
+    }
+
+    async function sendQuery() {
+      const q = input.value.trim();
+      if (!q) return;
+      
+      addMessage(q, true);
+      input.value = '';
+      input.style.height = '40px';
+      sendBtn.disabled = true;
+      addLoadingBubble();
+
+      try {
+        const res = await fetch('/api/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: q })
+        });
+        removeLoadingBubble();
+        const data = await res.json();
+        if (res.ok) {
+          addMessage(data.answer || '(无响应)', false);
+        } else {
+          addMessage(`❌ 错误: ${data.error || '请求失败'}`, false);
+        }
+      } catch (e) {
+        removeLoadingBubble();
+        addMessage(`❌ 请求失败: ${e.message}`, false);
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+
+    sendBtn.onclick = sendQuery;
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) sendQuery();
+      else if (e.key === 'Enter') {
+        input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+      }
+    });
+
+    // 欢迎消息
+    addMessage('👋 你好！我是一个基于 ReAct 框架的智能助手。\n\n我可以帮你：\n• 回答关于时事的问题\n• 进行网页搜索\n• 分析和总结信息\n\n请输入你的问题吧！', false);
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - SERPAPI_API_KEY=${SERPAPI_API_KEY}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_MODEL_ID=Qwen/Qwen2.5-Coder-32B-Instruct
+      - LLM_BASE_URL=https://api-inference.modelscope.cn/v1/
+      - FLASK_ENV=production
+    volumes:
+      - .:/app
+    restart: unless-stopped

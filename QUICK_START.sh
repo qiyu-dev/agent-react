@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# 🚀 快速部署启动脚本
+# 此脚本展示部署的所有步骤
+
+echo "════════════════════════════════════════════════════════════"
+echo "  🤖 Agent ReAct - 云端部署快速启动"
+echo "════════════════════════════════════════════════════════════"
+echo ""
+
+echo "✅ 已完成的准备工作："
+echo "   • 应用代码完成"
+echo "   • 所有配置文件已生成"
+echo "   • 文档完整"
+echo "   • 可以立即部署"
+echo ""
+
+echo "📋 部署只需 3 步："
+echo ""
+echo "第 1 步: 创建 GitHub 仓库"
+echo "  └─ 访问: https://github.com/new"
+echo "  └─ 创建新仓库 'agent-react'"
+echo "  └─ 复制仓库 URL"
+echo ""
+
+echo "第 2 步: 推送代码到 GitHub"
+echo "  └─ git init"
+echo "  └─ git add ."
+echo "  └─ git commit -m \"Initial commit\""
+echo "  └─ git remote add origin YOUR_REPO_URL"
+echo "  └─ git push -u origin main"
+echo ""
+
+echo "第 3 步: 部署到 Railway"
+echo "  └─ 访问: https://railway.app"
+echo "  └─ 点击 'Create New' → 'Deploy from GitHub'"
+echo "  └─ 选择你的 agent-react 仓库"
+echo "  └─ 添加环境变量（见下方）"
+echo "  └─ 点击 'Redeploy' → 等待完成"
+echo ""
+
+echo "🔑 需要的 API 密钥:"
+echo ""
+echo "1. SerpAPI (网络搜索)"
+echo "   获取地址: https://serpapi.com"
+echo "   免费额度: 100 次/月"
+echo ""
+
+echo "2. ModelScope (大语言模型)"
+echo "   获取地址: https://modelscope.cn"
+echo "   免费额度: 可用"
+echo ""
+
+echo "⚙️  环境变量配置:"
+echo "在 Railway 的 'Variables' 选项卡添加:"
+echo ""
+echo "  SERPAPI_API_KEY = 你的_serpapi_密钥"
+echo "  LLM_API_KEY = 你的_modelscope_密钥"
+echo "  LLM_MODEL_ID = Qwen/Qwen2.5-Coder-32B-Instruct"
+echo "  LLM_BASE_URL = https://api-inference.modelscope.cn/v1/"
+echo "  FLASK_ENV = production"
+echo ""
+
+echo "📚 文档参考:"
+echo "  • DEPLOY_SUMMARY.md  - 部署总结（强烈推荐先读这个！）"
+echo "  • RAILWAY_GUIDE.md   - Railway 详细指南"
+echo "  • README.md          - 项目完整文档"
+echo "  • CHECKLIST.md       - 部署检查清单"
+echo ""
+
+echo "🔗 快速链接:"
+echo "  GitHub:  https://github.com/new"
+echo "  Railway: https://railway.app"
+echo "  SerpAPI: https://serpapi.com"
+echo "  ModelScope: https://modelscope.cn"
+echo ""
+
+echo "════════════════════════════════════════════════════════════"
+echo ""
+echo "👉 建议: 先阅读 DEPLOY_SUMMARY.md，然后按步骤部署"
+echo ""
+echo "🎉 10 分钟内你的应用就会上线！"
+echo ""

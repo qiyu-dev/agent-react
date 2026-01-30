@@ -1,0 +1,9 @@
+# Vercel 部署配置
+# 创建此文件用于 Vercel 部署
+
+[build]
+  command = "pip install -r requirements.txt"
+  functions = "api"
+
+[env]
+  PYTHONUNBUFFERED = "1"
