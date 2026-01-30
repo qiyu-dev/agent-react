@@ -1,9 +1,13 @@
 from flask import Flask, request, jsonify, render_template
+import os
 from React import ReActAgent
 from LLM import HelloAgentsLLM
 from tools import ToolExecutor, search
 
 app = Flask(__name__, template_folder='templates')
+
+# 设置 SECRET_KEY（用于 session 加密）
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # 初始化 agent（复用现有类）
 llm = HelloAgentsLLM()
@@ -30,7 +34,6 @@ def api_query():
 
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get('PORT', 5001))
     debug = os.environ.get('FLASK_ENV') == 'development'
     app.run(host='0.0.0.0', port=port, debug=debug)
